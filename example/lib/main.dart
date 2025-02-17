@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:mrz_scanner/mrz_scanner.dart';
 
 Future<void> main() async {
-  runApp(MyApp());
+  runApp(const MrzScannerPage());
 }
 
-class MyApp extends StatefulWidget {
+class MrzScannerPage extends StatefulWidget {
+  static const String routeName = "/lib/MrzScannerPage";
+
+  const MrzScannerPage({super.key});
+
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<MrzScannerPage> createState() => _MrzScannerPageState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MrzScannerPageState extends State<MrzScannerPage> {
   final MRZController controller = MRZController();
 
   @override
@@ -37,6 +41,7 @@ class _MyAppState extends State<MyApp> {
                         child: const Text('Reset Scanning'),
                       ),
                       Text('Name : ${mrzResult.givenNames}'),
+                      Text('First Name : ${mrzResult.surnames}'),
                       Text('Gender : ${mrzResult.sex.name}'),
                       Text('CountryCode : ${mrzResult.countryCode}'),
                       Text('Date of Birth : ${mrzResult.birthDate}'),
