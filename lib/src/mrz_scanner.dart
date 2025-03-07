@@ -149,16 +149,29 @@ class MRZScannerState extends State<MRZScanner> {
 
   /// 根据相机方向旋转图片
   img.Image rotateImage(img.Image image, InputImageRotation rotation) {
+    // 先进行旋转
+    img.Image rotatedImage;
     switch (rotation) {
       case InputImageRotation.rotation90deg:
-        return img.copyRotate(image, angle: 90);
+        rotatedImage = img.copyRotate(image, angle: 90);
+        break;
       case InputImageRotation.rotation180deg:
-        return img.copyRotate(image, angle: 180);
+        rotatedImage = img.copyRotate(image, angle: 180);
+        break;
       case InputImageRotation.rotation270deg:
-        return img.copyRotate(image, angle: 270);
+        rotatedImage = img.copyRotate(image, angle: 270);
+        break;
       default:
-        return image;
+        rotatedImage = image;
     }
+
+    // 计算正方形裁剪区域
+    int size = rotatedImage.width < rotatedImage.height ? rotatedImage.width : rotatedImage.height;
+    int x = (rotatedImage.width - size) ~/ 2;
+    int y = (rotatedImage.height - size) ~/ 2;
+
+    // 裁剪成正方形
+    return img.copyCrop(rotatedImage, x: x, y: y, width: size, height: size);
   }
 
   /// **NV21 (YUV420) 转 RGB**
