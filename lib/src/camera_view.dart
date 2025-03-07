@@ -80,24 +80,12 @@ class _MRZCameraViewState extends State<MRZCameraView> {
       return Container();
     }
 
-    final size = MediaQuery.of(context).size;
-    // calculate scale depending on screen and camera ratios
-    // this is actually size.aspectRatio / (1 / camera.aspectRatio)
-    // because camera preview size is received as landscape
-    // but we're calculating for portrait orientation
-    var scale = size.aspectRatio * _controller!.value.aspectRatio;
-    // to prevent scaling down, invert the value
-    if (scale < 1) scale = 1 / scale;
-
     return Container(
       color: Colors.black,
       child: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          Transform.scale(
-            scale: scale,
-            child: CameraPreview(_controller!),
-          ),
+          CameraPreview(_controller!),
         ],
       ),
     );
@@ -126,47 +114,6 @@ class _MRZCameraViewState extends State<MRZCameraView> {
     _controller = null;
   }
 
-  /*Future _processCameraImage(CameraImage image) async {
-    final WriteBuffer allBytes = WriteBuffer();
-    for (final Plane plane in image.planes) {
-      allBytes.putUint8List(plane.bytes);
-    }
-    final bytes = allBytes.done().buffer.asUint8List();
-
-    final Size imageSize =
-        Size(image.width.toDouble(), image.height.toDouble());
-
-    final camera = cameras[_cameraIndex];
-    final imageRotation =
-        InputImageRotationValue.fromRawValue(camera.sensorOrientation);
-    if (imageRotation == null) return;
-
-    final inputImageFormat =
-        InputImageFormatValue.fromRawValue(image.format.raw);
-    if (inputImageFormat == null) return;
-
-    final planeData = image.planes.map(
-      (Plane plane) {
-        return InputImagePlaneMetadata(
-          bytesPerRow: plane.bytesPerRow,
-          height: plane.height,
-          width: plane.width,
-        );
-      },
-    ).toList();
-
-    final inputImageData = InputImageData(
-      size: imageSize,
-      imageRotation: imageRotation,
-      inputImageFormat: inputImageFormat,
-      planeData: planeData,
-    );
-
-    final inputImage =
-        InputImage.fromBytes(bytes: bytes, inputImageData: inputImageData);
-
-    widget.onImage(inputImage);
-  }*/
   Future _processCameraImage(CameraImage image) async {
     // 将图像字节数据组合为一个 Uint8List
     final WriteBuffer allBytes = WriteBuffer();
