@@ -106,6 +106,10 @@ class MRZScannerState extends State<MRZScanner> {
     // **步骤 1：转换 NV21 (YUV) 数据到 RGB**
     img.Image rgbImage = convertNV21ToImage(bytes, size?.width.toInt() ?? 0, size?.height.toInt() ?? 0);
 
+    // 根据相机方向旋转图片
+    final orientation = inputImage.metadata?.rotation ?? InputImageRotation.rotation0deg;
+    rgbImage = rotateImage(rgbImage, orientation);
+
     // **步骤 2：将 RGB 转换为 JPEG**
     unit.Uint8List jpegBytes = unit.Uint8List.fromList(img.encodeJpg(rgbImage));
 
@@ -115,6 +119,46 @@ class MRZScannerState extends State<MRZScanner> {
     // **步骤 4：存入图库**
     final result = await ImageGallerySaverPlus.saveImage(jpegBytes, name: fileName);
     debugPrint("result: $result");
+  }
+
+  Future<void> saveBGRAImage(InputImage inputImage) async {
+    if (inputImage.type != InputImageType.bytes) {
+      return;
+    }
+
+    unit.Uint8List bytes = inputImage.bytes!;
+
+    final size = inputImage.metadata?.size;
+    // **步骤 1：转换 BGRA8888 到 RGB**
+    img.Image rgbImage = convertBGRA8888ToImage(bytes, size?.width.toInt() ?? 0, size?.height.toInt() ?? 0);
+
+    // 根据相机方向旋转图片
+    final orientation = inputImage.metadata?.rotation ?? InputImageRotation.rotation0deg;
+    rgbImage = rotateImage(rgbImage, orientation);
+
+    // **步骤 2：将 RGB 转换为 JPEG**
+    unit.Uint8List jpegBytes = unit.Uint8List.fromList(img.encodeJpg(rgbImage));
+
+    // **步骤 3：保存 JPEG 文件**
+    final String fileName = "image_${DateTime.now().millisecondsSinceEpoch}.jpg";
+
+    // **步骤 4：存入图库**
+    final result = await ImageGallerySaverPlus.saveImage(jpegBytes, name: fileName);
+    debugPrint(" $result");
+  }
+
+  /// 根据相机方向旋转图片
+  img.Image rotateImage(img.Image image, InputImageRotation rotation) {
+    switch (rotation) {
+      case InputImageRotation.rotation90deg:
+        return img.copyRotate(image, angle: 90);
+      case InputImageRotation.rotation180deg:
+        return img.copyRotate(image, angle: 180);
+      case InputImageRotation.rotation270deg:
+        return img.copyRotate(image, angle: 270);
+      default:
+        return image;
+    }
   }
 
   /// **NV21 (YUV420) 转 RGB**
@@ -140,28 +184,6 @@ class MRZScannerState extends State<MRZScanner> {
       }
     }
     return image;
-  }
-
-  Future<void> saveBGRAImage(InputImage inputImage) async {
-    if (inputImage.type != InputImageType.bytes) {
-      return;
-    }
-
-    unit.Uint8List bytes = inputImage.bytes!;
-
-    final size = inputImage.metadata?.size;
-    // **步骤 1：转换 BGRA8888 到 RGB**
-    img.Image rgbImage = convertBGRA8888ToImage(bytes, size?.width.toInt() ?? 0, size?.height.toInt() ?? 0);
-
-    // **步骤 2：将 RGB 转换为 JPEG**
-    unit.Uint8List jpegBytes = unit.Uint8List.fromList(img.encodeJpg(rgbImage));
-
-    // **步骤 3：保存 JPEG 文件**
-    final String fileName = "image_${DateTime.now().millisecondsSinceEpoch}.jpg";
-
-    // **步骤 4：存入图库**
-    final result = await ImageGallerySaverPlus.saveImage(jpegBytes, name: fileName);
-    debugPrint(" $result");
   }
 
   /// **BGRA8888 转 RGB**
